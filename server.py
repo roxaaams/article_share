@@ -5,7 +5,7 @@ import socket
 from _thread import *
 
 s = socket.socket()
-host = "127.0.0.1"
+host = "0.0.0.0"
 port = 7734
 s.bind((host, port))
 s.listen(5)

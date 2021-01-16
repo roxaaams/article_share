@@ -1,11 +1,52 @@
-A simple Napster-like file sharing system.
-Napster is first widely used service for ‘free’ peer-to-peer (P2P) music sharing. ArticleShare
-application will provide p2p article sharing which is very similar to Napster. Here are some high-level
-design requirements of this system.
-1. A centralized server keeps track of which clients store what files.
-2. A client informs the server as to what files are contained in its local repository, but does not actually transmit file-data to the server.
-3. When a client requires a file that does not belong to its repository, a request is sent to the server.
-The server identifies some other client who stores the requested file and sends its
-identity to the requesting client. The file is then directly fetched by the requesting client from
-the node that has a copy of the file without requiring any server intervention.
-4. Multiple clients could be downloading different files from a target client at a given point in time.
+# P2P SYSTEM ON GOOGLE COMPUTE ENGINE VMs
+
+## CREDITS
+
+https://github.com/souvikmaji/article_share
+
+## RUN 
+
+`gcloud compute ssh SERVER_VM
+python3 path/to/your/server.py`
+
+and
+
+`gcloud compute ssh CLIENT_VM
+python3 path/to/your/client.py`
+
+
+## CONFIGURATIONS FOR WORKING ON GOOGLE COMPUTE ENGINE VMs
+
+In the original project, both server and client run on the same machine and communicate through 
+a socket binded on the port 7734 and localhost (127.0.0.1).
+
+If we want them to run them on different machines, in our case two arbitrary
+GOOGLE COMPUTE ENGINE VMs, the following steps have to be applied:
+
+1. Configure Google Compute Engine firewall 
+
+Google Compute Engine firewall by default blocks all ingress traffic 
+(i.e. incoming network traffic) to our VMs. The port 7734 is not allowed by default.
+
+Firstly, we create a new firewall rule that allows INGRESS tcp:7734 with VMs containing tag 'allow-tcp-7734'
+`gcloud compute firewall-rules create rule-allow-tcp-7734 --source-ranges 0.0.0.0/0
+ --target-tags allow-tcp-7734 --allow tcp:7734`
+
+Then, we associate the 'allow-tcp-7734' tag on the server VM named SERVER_VM to allow ingress 7734
+`gcloud compute instances add-tags SERVER_VM --tags allow-tcp-7734`
+
+Repeat the step above for the client VM named CLIENT_VM
+`gcloud compute instances add-tags CLIENT_VM --tags allow-tcp-7734`
+
+2. Update server host
+
+In client.py, we have to change the host to the external IP address of the server VM.
+`host = "XX.XX.XX.XXX"` 
+
+In server.py, things are getting a bit more complicated, since we can only bind an IP
+address owned by our machine and localhost means the connection to our service can only
+be made locally.
+So, we have to bind the host as 0.0.0.0 instead of the external IP address assigned to
+our server VM, since this means all IPs on our server VM. So, our client can connect to our server,
+if it can connect to any of the server IPs.
+`host = "0.0.0.0"` 

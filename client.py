@@ -118,7 +118,7 @@ def peer_information():
 upload_port_num = 65000 + random.randint(1, 500)  # upload port: 65000~65500
 dict_list_of_files = []  # list of dictionaries of RFC numbers and Titles.
 s = socket.socket()
-host = "127.0.0.1"
+host = "34.66.103.105"
 port = 7734
 s.connect((host, port))
 data = pickle.dumps(peer_information())  # send all the peer information to server
